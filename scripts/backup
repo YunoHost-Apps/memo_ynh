@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+source ../settings/scripts/_common.sh
+source /usr/share/yunohost/helpers
+
+ynh_print_info "Declaring files to be backed up..."
+
+#=================================================
+# BACKUP THE APP MAIN DIR
+#=================================================
+
+# Around 100 MB of it is the bun runtime and node_modules. Taking them along
+# means a restore needs no network and no npm registry, which is worth the
+# archive size on a box that may be restored years from now.
+ynh_backup "$install_dir"
+
+#=================================================
+# BACKUP THE DATA DIR
+#=================================================
+
+# The boards. Skipped by the safety backup that runs before an upgrade, which
+# is fine: an upgrade never touches this directory.
+ynh_backup "$data_dir"
+
+#=================================================
+# BACKUP SYSTEM CONFIGURATION
+#=================================================
+
+ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
+
+ynh_backup "/etc/systemd/system/$app.service"
+
+ynh_backup "/etc/logrotate.d/$app"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_print_info "Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."

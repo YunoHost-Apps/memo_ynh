@@ -1,0 +1,109 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/main/schemas/manifest.v2.schema.json
+
+packaging_format = 2
+
+id = "memo"
+name = "Memo"
+description.en = "Collaborative sticky-note boards in real time, stored in one SQLite file"
+description.fr = "Tableaux de post-it collaboratifs en temps réel, stockés dans un seul fichier SQLite"
+
+# <upstream tag>~ynh<packaging revision>
+version = "0.9.0~ynh1"
+
+maintainers = ["mrflos"]
+
+[upstream]
+license = "AGPL-3.0-only"
+website = "https://codeberg.org/mrflos/memo"
+code = "https://codeberg.org/mrflos/memo"
+admindoc = "https://codeberg.org/mrflos/memo#readme"
+
+[integration]
+yunohost = ">= 12.1.17"
+helpers_version = "2.1"
+
+# Bun publishes builds for x86-64 and aarch64 only, so an armhf board or a
+# 32 bit machine cannot run this. The amd64 asset is the "baseline" one, which
+# drops the AVX2 requirement: plenty of self-hosted boxes are older than
+# Haswell and the regular build segfaults on them with no useful message.
+architectures = ["amd64", "arm64"]
+
+multi_instance = true
+
+# People sign in with their YunoHost account, and the portal signs them in
+# without a second login form.
+ldap = true
+sso = true
+
+# The bun runtime is 80 MB of the install dir on its own; the rest is the
+# checkout, node_modules and the boards themselves.
+disk = "250M"
+ram.build = "500M"
+ram.runtime = "200M"
+
+[install]
+
+    [install.domain]
+    type = "domain"
+
+    [install.path]
+    type = "path"
+    default = "/memo"
+
+    [install.init_main_permission]
+    type = "group"
+    default = "all_users"
+
+    [install.admin]
+    type = "user"
+    help.en = "This account gets memo's admin page, which lists and deletes boards. The role is granted once, while memo has no admin at all: changing this setting later does nothing, revoke or grant from the admin page instead."
+    help.fr = "Ce compte obtient la page d'administration de memo, qui liste et supprime les tableaux. Le rôle n'est accordé qu'une fois, tant que memo n'a aucun admin : modifier ce réglage plus tard ne fait rien, révoquez ou accordez depuis la page d'administration."
+
+    [install.language]
+    ask.en = "Interface language for anyone who has not chosen one"
+    ask.fr = "Langue de l'interface pour qui n'en a pas choisi une"
+    type = "select"
+    choices = ["en", "fr", "es", "ru"]
+    default = "en"
+
+[resources]
+
+    [resources.sources]
+
+    [resources.sources.main]
+    # Re-pin with dev/update-source.sh. Codeberg serves the same bytes for a
+    # tag archive every time, which is what the checksum needs; a branch
+    # archive would change under it.
+    url = "https://codeberg.org/mrflos/memo/archive/v0.9.0.tar.gz"
+    sha256 = "e1574341c1d921d9e0d3b0ac28d42d823aaf1875e17f7b8d09859806b3dfbe7a"
+
+    autoupdate.strategy = "latest_forgejo_tag"
+    autoupdate.upstream = "https://codeberg.org/mrflos/memo"
+
+    [resources.sources.bun]
+    # The runtime memo needs. It is not packaged in Debian and YunoHost has no
+    # bun resource the way it has one for nodejs, so the release zip is fetched
+    # like any other asset and lands in $install_dir/bin/bun.
+    # Bump both arches together with dev/update-bun.sh (currently 1.4.2).
+    amd64.url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-linux-x64-baseline.zip"
+    amd64.sha256 = "c678040f14fe0440eb839d37cbd0ce4c051a32da72806ac97de6a6aab6bf728f"
+    arm64.url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-linux-aarch64.zip"
+    arm64.sha256 = "54328bbc2d9c8e0c9f892c544d66c57a83b84139e34909e5ee81758f1ac8fda7"
+
+    [resources.system_user]
+
+    [resources.install_dir]
+
+    # The SQLite file lives here rather than in the install dir, so that
+    # removing the app without --purge leaves the boards behind and an upgrade
+    # never has to tiptoe around them.
+    [resources.data_dir]
+
+    [resources.permissions]
+    main.url = "/"
+    # What makes the SSO worth having: nginx turns the header SSOwat sets into
+    # the one memo reads, and nobody sees a second login form.
+    main.auth_header = true
+
+    [resources.ports]
+    main.default = 8088

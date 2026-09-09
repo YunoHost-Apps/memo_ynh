@@ -1,0 +1,42 @@
+# memo's configuration, read by systemd as EnvironmentFile.
+#
+# Generated from the package template. Anything you change by hand here is
+# backed up and then overwritten on the next upgrade; the three settings the
+# config panel offers are written back into this file and remembered.
+#
+# Every option memo takes is documented at
+# https://codeberg.org/mrflos/memo#options
+
+PORT=__PORT__
+# nginx is in front and is the only thing that should reach the port.
+HOSTNAME=127.0.0.1
+BASEURL=__PATH__
+DB_PATH=__DATA_DIR__/memo.sqlite
+
+# Quoted because these three are what the config panel writes back into this
+# file, and its editor needs an existing value to replace. An empty pair of
+# quotes is a value; a bare `LOGO_URL=` is nothing, and the write fails on it.
+DEFAULT_LANG="__LANGUAGE__"
+LOGO_URL="__LOGO_URL__"
+FAVICON_URL="__FAVICON_URL__"
+
+# Identity comes from the portal. memo mints no session of its own in this
+# mode, so signing out of YunoHost signs you out here too.
+AUTH=proxy
+ORIGIN=https://__DOMAIN__
+
+# Checked against the connection's peer address, never against anything in the
+# request. Without it memo refuses to start, and rightly so: a header is only a
+# header, and anyone who could reach the port could claim to be anyone.
+TRUSTED_PROXIES=127.0.0.1,::1
+
+# nginx rewrites SSOwat's YNH_USER and YNH_USER_FULLNAME into these, and blanks
+# Remote-Groups so a client cannot invent a group membership. YunoHost groups
+# are not forwarded, which is why ADMIN_GROUP is left out.
+PROXY_USER_HEADER=remote-user
+PROXY_NAME_HEADER=remote-name
+PROXY_GROUPS_HEADER=remote-groups
+
+# Granted only while memo has no admin at all. Leaving it here cannot quietly
+# restore the role after somebody revokes it.
+ADMIN_SUBJECT=__ADMIN__

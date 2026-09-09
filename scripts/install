@@ -1,0 +1,72 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source /usr/share/yunohost/helpers
+
+#=================================================
+# INITIALIZE AND STORE SETTINGS
+#=================================================
+
+# Not install questions: nobody should be asked about a logo before they have
+# seen the app. They are here so the config panel has something to read, and so
+# the .env template has something to write.
+logo_url=""
+favicon_url=""
+ynh_app_setting_set --key=logo_url --value="$logo_url"
+ynh_app_setting_set --key=favicon_url --value="$favicon_url"
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_script_progression "Setting up source files..."
+
+ynh_setup_source --dest_dir="$install_dir"
+
+ynh_script_progression "Installing the bun runtime..."
+
+memo_setup_bun
+
+ynh_script_progression "Fetching $app's dependencies..."
+
+memo_bun_install
+
+chown -R "$app:$app" "$install_dir"
+
+#=================================================
+# APP INITIAL CONFIGURATION
+#=================================================
+ynh_script_progression "Adding $app's configuration files..."
+
+memo_add_config
+
+#=================================================
+# SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression "Adding system configurations related to $app..."
+
+memo_prepare_logs
+
+ynh_config_add_nginx
+
+ynh_config_add_systemd
+
+yunohost service add "$app" --description="$service_description" --log="/var/log/$app/$app.log"
+
+ynh_config_add_logrotate
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression "Starting $app's systemd service..."
+
+ynh_systemctl --service="$app" --action="start" --wait_until="storing boards in"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression "Installation of $app completed"

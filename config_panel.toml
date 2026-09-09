@@ -1,0 +1,37 @@
+#:schema https://github.com/YunoHost/apps/raw/main/schemas/config_panel.v1.schema.json
+
+version = "1.0"
+
+[main]
+name.en = "Configuration"
+name.fr = "Configuration"
+services = ["__APP__"]
+
+    [main.appearance]
+    name.en = "Appearance"
+    name.fr = "Apparence"
+
+        [main.appearance.language]
+        ask.en = "Default interface language"
+        ask.fr = "Langue par défaut de l'interface"
+        help.en = "What visitors see until they pick a language of their own."
+        help.fr = "Ce que voient les visiteurs tant qu'ils n'ont pas choisi la leur."
+        type = "select"
+        choices = ["en", "fr", "es", "ru"]
+        bind = "DEFAULT_LANG:__INSTALL_DIR__/.env"
+
+        [main.appearance.logo_url]
+        ask.en = "Logo URL"
+        ask.fr = "URL du logo"
+        help.en = "Replaces the memo wordmark at the top of every page. Leave empty to keep it."
+        help.fr = "Remplace le logo memo en haut de chaque page. Laissez vide pour le garder."
+        type = "string"
+        optional = true
+        bind = "LOGO_URL:__INSTALL_DIR__/.env"
+
+        [main.appearance.favicon_url]
+        ask.en = "Favicon URL"
+        ask.fr = "URL du favicon"
+        type = "string"
+        optional = true
+        bind = "FAVICON_URL:__INSTALL_DIR__/.env"
