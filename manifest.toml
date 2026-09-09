@@ -19,7 +19,7 @@ code = "https://codeberg.org/mrflos/memo"
 admindoc = "https://codeberg.org/mrflos/memo#readme"
 
 [integration]
-yunohost = ">= 12.1.17"
+yunohost = ">= 12.1.40"
 helpers_version = "2.1"
 
 # Bun publishes builds for x86-64 and aarch64 only, so an armhf board or a
@@ -27,12 +27,11 @@ helpers_version = "2.1"
 # drops the AVX2 requirement: plenty of self-hosted boxes are older than
 # Haswell and the regular build segfaults on them with no useful message.
 architectures = ["amd64", "arm64"]
-
 multi_instance = true
 
 # People sign in with their YunoHost account, and the portal signs them in
 # without a second login form.
-ldap = true
+ldap = false
 sso = true
 
 # The bun runtime is 80 MB of the install dir on its own; the rest is the
@@ -60,8 +59,8 @@ ram.runtime = "200M"
     help.fr = "Ce compte obtient la page d'administration de memo, qui liste et supprime les tableaux. Le rôle n'est accordé qu'une fois, tant que memo n'a aucun admin : modifier ce réglage plus tard ne fait rien, révoquez ou accordez depuis la page d'administration."
 
     [install.language]
-    ask.en = "Interface language for anyone who has not chosen one"
-    ask.fr = "Langue de l'interface pour qui n'en a pas choisi une"
+    ask.en = "Choose the application language"
+    ask.fr = "Choisissez la langue de l'application"
     type = "select"
     choices = ["en", "fr", "es", "ru"]
     default = "en"
@@ -106,4 +105,3 @@ ram.runtime = "200M"
     main.auth_header = true
 
     [resources.ports]
-    main.default = 8088
