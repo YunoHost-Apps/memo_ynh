@@ -35,6 +35,15 @@ memo_bun_install() {
     ynh_safe_rm "$install_dir/.bun"
 }
 
+# The one value nginx.conf needs that YunoHost does not hand us: where the
+# portal should send someone back to after they sign in, base64 encoded, which
+# is the form the portal reads it in. Call it before any of the nginx helpers
+# or the template will not have a $portal_return to substitute and the script
+# will stop there.
+memo_set_portal_return() {
+    portal_return=$(printf 'https://%s%s/' "$domain" "${path%/}" | base64 --wrap=0)
+}
+
 # The whole configuration, in one file, read by systemd before it drops
 # privileges. Called from install, upgrade and change_url, because the domain
 # and the path are baked into ORIGIN and BASEURL.

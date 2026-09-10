@@ -21,7 +21,8 @@ LOGO_URL="__LOGO_URL__"
 FAVICON_URL="__FAVICON_URL__"
 
 # Identity comes from the portal. memo mints no session of its own in this
-# mode, so signing out of YunoHost signs you out here too.
+# mode, so signing out of YunoHost signs you out here too, and memo's own sign
+# out button is routed to the portal's logout by the nginx config.
 AUTH=proxy
 ORIGIN=https://__DOMAIN__
 
@@ -33,8 +34,8 @@ TRUSTED_PROXIES=127.0.0.1,::1
 # nginx rewrites SSOwat's YNH_USER and YNH_USER_FULLNAME into these, and blanks
 # Remote-Groups so a client cannot invent a group membership. YunoHost groups
 # are not forwarded, which is why ADMIN_GROUP is left out.
-PROXY_USER_HEADER=remote-user
-PROXY_NAME_HEADER=remote-name
+PROXY_USER_HEADER=Ynh-User
+PROXY_NAME_HEADER=Ynh-User-Fullname
 PROXY_GROUPS_HEADER=remote-groups
 
 # Granted only while memo has no admin at all. Leaving it here cannot quietly
