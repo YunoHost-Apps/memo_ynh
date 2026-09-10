@@ -16,6 +16,18 @@ Anyone the permission lets in arrives already signed in, under their YunoHost
 name. memo mints no session of its own here, so signing out of the portal signs
 you out of memo too, and there is no second password to manage.
 
+It works the other way round too. memo's own "Sign out" goes through the
+portal's logout, so it ends the YunoHost session and not just memo's idea of
+one. You land back on the page you left and the SSO asks you to sign in again.
+The redirect that does this lives in the app's nginx config, in
+`/etc/nginx/conf.d/your.domain.d/memo.conf`. Remove it and the button does
+nothing useful: the portal cookie survives and signs you straight back in.
+
+The "Sign in" link only appears when you open the permission to visitors, and
+it is redirected the same way, out to the portal and back to memo once the
+person is through. Both redirects are rewritten on every upgrade and whenever
+you move the app with `yunohost app change-url`.
+
 The account you chose at install time got memo's admin page, at
 `https://your.domain/memo/admin`, which lists, searches and deletes boards and
 manages accounts. That grant happens once, while memo has no admin at all.

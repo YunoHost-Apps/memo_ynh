@@ -21,7 +21,8 @@ LOGO_URL="__LOGO_URL__"
 FAVICON_URL="__FAVICON_URL__"
 
 # Identity comes from the portal. memo mints no session of its own in this
-# mode, so signing out of YunoHost signs you out here too.
+# mode, so signing out of YunoHost signs you out here too, and memo's own sign
+# out button is routed to the portal's logout by the nginx config.
 AUTH=proxy
 ORIGIN=https://__DOMAIN__
 

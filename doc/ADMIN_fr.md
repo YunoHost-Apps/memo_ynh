@@ -16,6 +16,19 @@ Qui a la permission arrive déjà connecté, sous son nom YunoHost. memo ne cré
 aucune session de son côté : se déconnecter du portail déconnecte aussi de
 memo, et il n'y a pas de second mot de passe à gérer.
 
+L'inverse vaut aussi. Le bouton « Déconnexion » de memo passe par la
+déconnexion du portail, donc il ferme la session YunoHost et pas seulement
+celle que memo croit avoir. Vous revenez sur la page quittée et le SSO vous
+redemande de vous connecter. La redirection qui fait ça est dans la config
+nginx de l'application, dans `/etc/nginx/conf.d/votre.domaine.d/memo.conf`.
+Retirez-la et le bouton ne sert plus à rien : le cookie du portail reste en
+place et vous reconnecte aussitôt.
+
+Le lien « Connexion » n'apparaît que si vous ouvrez la permission aux
+visiteurs, et il est redirigé de la même façon, vers le portail puis retour sur
+memo une fois la personne connectée. Les deux redirections sont réécrites à
+chaque mise à jour et à chaque `yunohost app change-url`.
+
 Le compte choisi à l'installation a reçu la page d'administration de memo, sur
 `https://votre.domaine/memo/admin`, qui liste, cherche et supprime les tableaux
 et gère les comptes. Ce droit n'est accordé qu'une fois, tant que memo n'a

@@ -55,6 +55,7 @@ ynh_script_progression "Upgrading system configurations related to $app..."
 
 memo_prepare_logs
 
+memo_set_portal_return
 ynh_config_add_nginx
 
 ynh_config_add_systemd
