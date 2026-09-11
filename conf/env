@@ -1,8 +1,8 @@
 # memo's configuration, read by systemd as EnvironmentFile.
 #
 # Generated from the package template. Anything you change by hand here is
-# backed up and then overwritten on the next upgrade; the three settings the
-# config panel offers are written back into this file and remembered.
+# backed up and then overwritten on the next upgrade; the settings the config
+# panel offers are written back into this file and remembered.
 #
 # Every option memo takes is documented at
 # https://codeberg.org/mrflos/memo#options
@@ -13,16 +13,20 @@ HOSTNAME=127.0.0.1
 BASEURL=__PATH__
 DB_PATH=__DATA_DIR__/memo.sqlite
 
-# Quoted because these three are what the config panel writes back into this
-# file, and its editor needs an existing value to replace. An empty pair of
-# quotes is a value; a bare `LOGO_URL=` is nothing, and the write fails on it.
+# Quoted because these are what the config panel writes back into this file,
+# and its editor needs an existing value to replace. An empty pair of quotes is
+# a value; a bare `LOGO_URL=` is nothing, and the write fails on it.
 DEFAULT_LANG="__LANGUAGE__"
 LOGO_URL="__LOGO_URL__"
 FAVICON_URL="__FAVICON_URL__"
 
+# Off by default, which means an account is needed to make a board. It only
+# matters on an install whose permission lets visitors in: reading and writing
+# on an existing board never needs an account either way.
+ALLOW_ANONYMOUS_BOARDS="__ALLOW_ANONYMOUS_BOARDS__"
+
 # Identity comes from the portal. memo mints no session of its own in this
-# mode, so signing out of YunoHost signs you out here too, and memo's own sign
-# out button is routed to the portal's logout by the nginx config.
+# mode, so signing out of YunoHost signs you out here too.
 AUTH=proxy
 ORIGIN=https://__DOMAIN__
 
@@ -31,13 +35,32 @@ ORIGIN=https://__DOMAIN__
 # header, and anyone who could reach the port could claim to be anyone.
 TRUSTED_PROXIES=127.0.0.1,::1
 
-# nginx rewrites SSOwat's YNH_USER and YNH_USER_FULLNAME into these, and blanks
-# Remote-Groups so a client cannot invent a group membership. YunoHost groups
-# are not forwarded, which is why ADMIN_GROUP is left out.
+# proxy_params_with_auth rewrites SSOwat's YNH_USER and YNH_USER_FULLNAME into
+# these, and the nginx config blanks Remote-Groups so a client cannot invent a
+# group membership. The names are the security boundary, not a preference:
+# SSOwat strips the headers a client sent whose name starts with ynh_ or ynh-,
+# and only those. YunoHost groups are not forwarded, which is why ADMIN_GROUP
+# is left out.
 PROXY_USER_HEADER=Ynh-User
 PROXY_NAME_HEADER=Ynh-User-Fullname
 PROXY_GROUPS_HEADER=remote-groups
 
+# The way in and the way out both belong to the portal, and memo sends people
+# there itself. `{back64}` is where they come back to, base64 encoded, which is
+# the form the portal reads it in; the logout returns them to the page they
+# left, where the SSO now asks for a login. Without these two, memo shows
+# neither link, because a way out that signs nobody out is worse than none.
+PROXY_LOGIN_URL="https://__DOMAIN__/yunohost/sso/?r={back64}"
+PROXY_LOGOUT_URL="https://__DOMAIN__/yunohost/portalapi/logout?referer_redirect"
+
 # Granted only while memo has no admin at all. Leaving it here cannot quietly
 # restore the role after somebody revokes it.
 ADMIN_SUBJECT=__ADMIN__
+
+# Snapshots taken by memo's own admin page, with VACUUM INTO and an integrity
+# check. In the data dir because the install dir is wiped and rewritten on
+# every upgrade, and because this is the one directory the service is allowed
+# to write to. They land in YunoHost's backup archive along with the boards, so
+# a handful is plenty; memo's own backup is the one you can take mid-workshop.
+BACKUP_DIR=__DATA_DIR__/backups
+BACKUP_KEEP=7
