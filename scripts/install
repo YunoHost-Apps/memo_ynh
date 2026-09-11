@@ -19,6 +19,12 @@ favicon_url=""
 ynh_app_setting_set --key=logo_url --value="$logo_url"
 ynh_app_setting_set --key=favicon_url --value="$favicon_url"
 
+# Whether a visitor with no account may make a board. Only reachable once the
+# permission lets visitors in at all, which is not the default, so it starts
+# off and the config panel turns it on.
+allow_anonymous_boards="0"
+ynh_app_setting_set --key=allow_anonymous_boards --value="$allow_anonymous_boards"
+
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
@@ -50,7 +56,6 @@ ynh_script_progression "Adding system configurations related to $app..."
 
 memo_prepare_logs
 
-memo_set_portal_return
 ynh_config_add_nginx
 
 ynh_config_add_systemd

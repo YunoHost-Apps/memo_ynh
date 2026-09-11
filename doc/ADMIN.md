@@ -4,6 +4,7 @@
 | --- | --- |
 | The code, the bun runtime, node_modules | `/var/www/memo` |
 | Every board, in one SQLite file | `/home/yunohost.app/memo/memo.sqlite` |
+| Snapshots taken from memo's admin page | `/home/yunohost.app/memo/backups` |
 | Configuration | `/var/www/memo/.env` |
 | Log | `/var/log/memo/memo.log` |
 
@@ -19,20 +20,25 @@ you out of memo too, and there is no second password to manage.
 It works the other way round too. memo's own "Sign out" goes through the
 portal's logout, so it ends the YunoHost session and not just memo's idea of
 one. You land back on the page you left and the SSO asks you to sign in again.
-The redirect that does this lives in the app's nginx config, in
-`/etc/nginx/conf.d/your.domain.d/memo.conf`. Remove it and the button does
-nothing useful: the portal cookie survives and signs you straight back in.
+The "Sign in" link is the mirror of it, and only appears once you open the
+permission to visitors.
 
-The "Sign in" link only appears when you open the permission to visitors, and
-it is redirected the same way, out to the portal and back to memo once the
-person is through. Both redirects are rewritten on every upgrade and whenever
-you move the app with `yunohost app change-url`.
+Both addresses are `PROXY_LOGIN_URL` and `PROXY_LOGOUT_URL` in
+`/var/www/memo/.env`, rewritten on every upgrade and whenever you move the app
+with `yunohost app change-url`. Empty either one and memo stops showing that
+link, which is the honest thing to do with a button that would sign nobody out.
+Up to 0.9.1~ynh1 these two redirects lived in the app's nginx config. memo does
+it itself now, so an old customisation there has nothing left to override.
+
+Opening a board and writing on it never needs an account. Making one does,
+unless the config panel says otherwise, which is a question only an install
+opened to visitors ever has to answer.
 
 The account you chose at install time got memo's admin page, at
-`https://your.domain/memo/admin`, which lists, searches and deletes boards and
-manages accounts. That grant happens once, while memo has no admin at all.
-Changing the setting afterwards does nothing. To add or remove an admin later,
-do it from that page.
+`https://your.domain/memo/admin`, which lists, searches and deletes boards,
+manages accounts, and takes a snapshot of the database. That grant happens
+once, while memo has no admin at all. Changing the setting afterwards does
+nothing. To add or remove an admin later, do it from that page.
 
 YunoHost group membership is not forwarded, so memo's `ADMIN_GROUP` and its
 group-based board sharing have nothing to read. Share a private board with
@@ -40,9 +46,10 @@ people by name.
 
 ## Configuration
 
-Three settings have a config panel: the default interface language, and a logo
-and favicon URL to replace memo's own. Everything else lives in
-`/var/www/memo/.env`, one `KEY=value` per line, documented in
+Four settings have a config panel: the default interface language, a logo and a
+favicon URL to replace memo's own, and whether a visitor with no account may
+create a board. Everything else lives in `/var/www/memo/.env`, one `KEY=value`
+per line, documented in
 [memo's README](https://codeberg.org/mrflos/memo#options). After editing it:
 
 ```bash
@@ -50,35 +57,46 @@ systemctl restart memo
 ```
 
 An upgrade rewrites that file from the package template. YunoHost notices the
-file changed, keeps a copy next to it, and tells you where. The three config
-panel settings survive because YunoHost stores them separately and puts them
-back.
+file changed, keeps a copy next to it, and tells you where. The config panel
+settings survive because YunoHost stores them separately and puts them back.
+
+Board pictures go into the same SQLite file as the boards, sixteen per board by
+default. Raise `MAX_IMAGES` if that is tight, and expect the file to grow: a
+photograph is a hundred times a card. The 16 MB ceiling on an upload is nginx's
+`client_max_body_size`, in the app's config.
 
 ## When nobody is signed in
 
 If memo shows everyone as anonymous, the chain to check is short. SSOwat sets
-`YNH_USER` on the request from the portal cookie; the app's nginx config turns
-it into the `Remote-User` header memo reads. That translation is these two
-lines of `/etc/nginx/conf.d/your.domain.d/memo.conf`:
+`ynh_user` on the request from the portal cookie, and `proxy_params_with_auth`,
+which YunoHost ships and the app's nginx config includes, turns it into the
+`Ynh-User` header memo reads. It only happens at all because the permission
+asks for it, with `main.auth_header = true` in the manifest. The two lines that
+pick those names up are in the `.env`:
 
-```nginx
-proxy_set_header Remote-User $http_ynh_user;
-proxy_set_header Remote-Name $http_ynh_user_fullname;
+```ini
+PROXY_USER_HEADER=Ynh-User
+PROXY_NAME_HEADER=Ynh-User-Fullname
 ```
 
-and it only happens at all because the permission asks for it, with
-`main.auth_header = true` in the manifest. If the header never arrives, set
-memo to read SSOwat's names directly instead: put `PROXY_USER_HEADER=ynh_user`
-and `PROXY_NAME_HEADER=ynh_user_fullname` in `.env`, restart, and drop the two
-nginx lines.
+Do not point them at `Remote-User` or any other name. SSOwat strips the headers
+a client sent whose name starts with `ynh_` or `ynh-`, and only those, so any
+other name is one a visitor can set for themselves and be whoever they like.
 
 ## Backups
 
-The archive carries the whole install directory, and about 100 MB of that is
-the bun runtime and node_modules. A restore then needs no network. If you back
-up nightly and the size bothers you, back up the data directory alone: the
-boards are all of it, and a reinstall plus a restore of `$data_dir` gets you
+The YunoHost archive carries the whole install directory, and about 100 MB of
+that is the bun runtime and node_modules. A restore then needs no network. If
+you back up nightly and the size bothers you, back up the data directory alone:
+the boards are all of it, and a reinstall plus a restore of `$data_dir` gets you
 back.
+
+memo takes its own snapshots too, from the admin page. `VACUUM INTO` copies the
+database while the server keeps serving, the copy is opened and checked before
+any older one is dropped, and it lands in `/home/yunohost.app/memo/backups`.
+Seven are kept, which `BACKUP_KEEP` in the `.env` changes. They are in the data
+directory, so a YunoHost archive carries them along with the boards. That is the
+price of being able to take one in the middle of a workshop without a shell.
 
 ## Architecture
 

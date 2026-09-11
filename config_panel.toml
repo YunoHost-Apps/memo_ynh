@@ -35,3 +35,18 @@ services = ["__APP__"]
         type = "string"
         optional = true
         bind = "FAVICON_URL:__INSTALL_DIR__/.env"
+
+    [main.boards]
+    name.en = "Boards"
+    name.fr = "Tableaux"
+
+        [main.boards.allow_anonymous_boards]
+        ask.en = "Let visitors create boards"
+        ask.fr = "Laisser les visiteurs créer des tableaux"
+        help.en = "Only matters if the permission lets visitors in: opening and writing on an existing board never needs an account, creating one does unless this is on."
+        help.fr = "N'a d'effet que si la permission accepte les visiteurs : ouvrir un tableau et y écrire ne demande jamais de compte, en créer un si, sauf si ceci est activé."
+        type = "boolean"
+        yes = "1"
+        no = "0"
+        default = "0"
+        bind = "ALLOW_ANONYMOUS_BOARDS:__INSTALL_DIR__/.env"
