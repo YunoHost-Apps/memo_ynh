@@ -8,7 +8,7 @@ description.en = "Collaborative sticky-note boards in real time, stored in one S
 description.fr = "Tableaux de post-it collaboratifs en temps réel, stockés dans un seul fichier SQLite"
 
 # <upstream tag>~ynh<packaging revision>
-version = "0.9.4~ynh1"
+version = "0.9.6~ynh1"
 
 maintainers = ["mrflos"]
 
@@ -73,8 +73,8 @@ ram.runtime = "200M"
     # Re-pin with dev/update-source.sh. Codeberg serves the same bytes for a
     # tag archive every time, which is what the checksum needs; a branch
     # archive would change under it.
-    url = "https://codeberg.org/mrflos/memo/archive/v0.9.4.tar.gz"
-    sha256 = "cc2a48b0e5d6c9b6bf0ecb04680a2c4de961d3fa016387e3c032a4413ed12493"
+    url = "https://codeberg.org/mrflos/memo/archive/v0.9.6.tar.gz"
+    sha256 = "afee1c9bb7bc44160706223b7790145bd0c4ab0d4c222136886e68d019c3593b"
 
     autoupdate.strategy = "latest_forgejo_tag"
     autoupdate.upstream = "https://codeberg.org/mrflos/memo"
