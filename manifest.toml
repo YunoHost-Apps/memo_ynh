@@ -8,7 +8,7 @@ description.en = "Collaborative sticky-note boards in real time, stored in one S
 description.fr = "Tableaux de post-it collaboratifs en temps réel, stockés dans un seul fichier SQLite"
 
 # <upstream tag>~ynh<packaging revision>
-version = "0.9.8~ynh1"
+version = "0.9.9~ynh1"
 
 maintainers = ["mrflos"]
 
@@ -22,10 +22,9 @@ admindoc = "https://codeberg.org/mrflos/memo#readme"
 yunohost = ">= 12.1.40"
 helpers_version = "2.1"
 
-# Bun publishes builds for x86-64 and aarch64 only, so an armhf board or a
-# 32 bit machine cannot run this. The amd64 asset is the "baseline" one, which
-# drops the AVX2 requirement: plenty of self-hosted boxes are older than
-# Haswell and the regular build segfaults on them with no useful message.
+# Upstream compiles with bun, which ships no 32 bit runtime, so armhf and i386
+# boards are out. Each release carries three binaries; which one lands here is
+# decided at install time, see memo_setup_binary in scripts/_common.sh.
 architectures = ["amd64", "arm64"]
 multi_instance = true
 
@@ -34,10 +33,11 @@ multi_instance = true
 ldap = false
 sso = true
 
-# The bun runtime is 80 MB of the install dir on its own; the rest is the
-# checkout, node_modules and the boards themselves.
+# The binary is 90 MB of the install dir on its own. The rest is the boards,
+# which live elsewhere anyway. Nothing is compiled at install time: the build
+# figure is what unpacking and checksumming one download needs.
 disk = "250M"
-ram.build = "500M"
+ram.build = "100M"
 ram.runtime = "200M"
 
 [install]
@@ -69,25 +69,45 @@ ram.runtime = "200M"
 
     [resources.sources]
 
+    # One compiled binary is the whole app: the bun runtime, the server, and
+    # the pages, fonts and background images packed inside it. No checkout, no
+    # node_modules, no network beyond this download. Re-pin the three assets of
+    # a release with dev/update-source.sh.
+    #
+    # Neither source is prefetched. Only one of the two is ever installed and
+    # each is 90 MB, and above all the core refuses to prefetch a source that
+    # has no asset for the machine's own architecture, which the amd64-only
+    # block below has not. ynh_setup_source downloads the one it is asked for.
+
+    # What runs anywhere: the baseline build on amd64, which asks nothing of
+    # the processor beyond plain x86-64, and the only build there is on arm64.
     [resources.sources.main]
-    # Re-pin with dev/update-source.sh. Codeberg serves the same bytes for a
-    # tag archive every time, which is what the checksum needs; a branch
-    # archive would change under it.
-    url = "https://codeberg.org/mrflos/memo/archive/v0.9.8.tar.gz"
-    sha256 = "b563c002daa42a3a1509b969cf16c3b2b24c6187b3852be2ddcc4269a92ea7c6"
+    amd64.url = "https://codeberg.org/mrflos/memo/releases/download/v0.9.9/memo-0.9.9-linux-amd64-baseline"
+    amd64.sha256 = "a90ce459c4b8f6966377debc2d23eae68553d20c6c620eca96bcff807532858a"
+    arm64.url = "https://codeberg.org/mrflos/memo/releases/download/v0.9.9/memo-0.9.9-linux-arm64"
+    arm64.sha256 = "cdc2cc2f7615b715241fb9e491ea0f1ce76169b91ab8f2b1b2000124267b88ad"
+    extract = false
+    rename = "memo"
+    prefetch = false
 
-    autoupdate.strategy = "latest_forgejo_tag"
+    autoupdate.strategy = "latest_forgejo_release"
     autoupdate.upstream = "https://codeberg.org/mrflos/memo"
+    autoupdate.asset.amd64 = "^memo-.*-linux-amd64-baseline$"
+    autoupdate.asset.arm64 = "^memo-.*-linux-arm64$"
 
-    [resources.sources.bun]
-    # The runtime memo needs. It is not packaged in Debian and YunoHost has no
-    # bun resource the way it has one for nodejs, so the release zip is fetched
-    # like any other asset and lands in $install_dir/bin/bun.
-    # Bump both arches together with dev/update-bun.sh (currently 1.4.2).
-    amd64.url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-linux-x64-baseline.zip"
-    amd64.sha256 = "c678040f14fe0440eb839d37cbd0ce4c051a32da72806ac97de6a6aab6bf728f"
-    arm64.url = "https://github.com/oven-sh/bun/releases/download/bun-v1.4.2/bun-linux-aarch64.zip"
-    arm64.sha256 = "54328bbc2d9c8e0c9f892c544d66c57a83b84139e34909e5ee81758f1ac8fda7"
+    # The faster amd64 build, which needs AVX2 and dies with SIGILL without it.
+    # Installed in place of the baseline one when the processor has the flag,
+    # so no arm64 asset belongs here.
+    [resources.sources.amd64_avx2]
+    amd64.url = "https://codeberg.org/mrflos/memo/releases/download/v0.9.9/memo-0.9.9-linux-amd64"
+    amd64.sha256 = "d842a7d08f63fe354b9153d3266c20e276b835c0f5e0fe93d591754a3742f28a"
+    extract = false
+    rename = "memo"
+    prefetch = false
+
+    autoupdate.strategy = "latest_forgejo_release"
+    autoupdate.upstream = "https://codeberg.org/mrflos/memo"
+    autoupdate.asset.amd64 = "^memo-.*-linux-amd64$"
 
     [resources.system_user]
 

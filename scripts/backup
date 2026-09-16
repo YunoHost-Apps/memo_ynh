@@ -14,9 +14,9 @@ ynh_print_info "Declaring files to be backed up..."
 # BACKUP THE APP MAIN DIR
 #=================================================
 
-# Around 100 MB of it is the bun runtime and node_modules. Taking them along
-# means a restore needs no network and no npm registry, which is worth the
-# archive size on a box that may be restored years from now.
+# Almost all of it is the 90 MB binary. Taking it along means a restore needs
+# no network, and it restores the build that was picked for this processor,
+# which is worth the archive size on a box that may be restored years from now.
 ynh_backup "$install_dir"
 
 #=================================================

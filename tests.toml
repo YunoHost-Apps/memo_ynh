@@ -8,7 +8,10 @@ test_format = 1.0
 # subdirectory, public and private, a second instance, backup and restore,
 # and change_url.
 #
-# The upgrade matters more than usual this time: 0.9.3 migrates the database on
-# first start, and it is where the portal redirects moved out of the nginx
-# config and into memo's own .env.
+# Two upgrades matter here. From 0.9.1, because 0.9.3 migrates the database on
+# first start and because that is where the portal redirects moved out of the
+# nginx config and into memo's own .env. From 0.9.8, the last install made of a
+# checkout, bun and node_modules, which is what proves the install dir gets
+# cleared out and the unit now starts a binary.
 test_upgrade_from.39a77f884340c8d1db670b7068795b71a3491a3a.name = "Upgrade from 0.9.1~ynh1"
+test_upgrade_from.7bc0d509386e2d10a86dc7ea80413e4909243fa2.name = "Upgrade from 0.9.8~ynh1"

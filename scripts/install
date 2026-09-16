@@ -28,19 +28,9 @@ ynh_app_setting_set --key=allow_anonymous_boards --value="$allow_anonymous_board
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression "Setting up source files..."
+ynh_script_progression "Setting up the memo binary..."
 
-ynh_setup_source --dest_dir="$install_dir"
-
-ynh_script_progression "Installing the bun runtime..."
-
-memo_setup_bun
-
-ynh_script_progression "Fetching $app's dependencies..."
-
-memo_bun_install
-
-chown -R "$app:$app" "$install_dir"
+memo_setup_binary
 
 #=================================================
 # APP INITIAL CONFIGURATION
