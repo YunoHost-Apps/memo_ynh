@@ -25,22 +25,12 @@ ynh_app_setting_set_default --key=allow_anonymous_boards --value="0"
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression "Upgrading source files..."
+ynh_script_progression "Upgrading the memo binary..."
 
-# Wiped rather than merged, so a file dropped upstream does not linger. The
-# .env is rewritten from the template right below, and the boards were never in
-# here to begin with.
-ynh_setup_source --dest_dir="$install_dir" --full_replace
-
-ynh_script_progression "Upgrading the bun runtime..."
-
-memo_setup_bun
-
-ynh_script_progression "Fetching $app's dependencies..."
-
-memo_bun_install
-
-chown -R "$app:$app" "$install_dir"
+# The whole install dir is replaced, which is how the checkout, node_modules
+# and the bundled bun of 0.9.8 and earlier are cleared out. The .env is
+# rewritten from the template right below, and the boards were never in here.
+memo_setup_binary
 
 #=================================================
 # UPDATE A CONFIG FILE

@@ -10,11 +10,7 @@ Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/
 EnvironmentFile=__INSTALL_DIR__/.env
 
-# bun looks for a home even when it has nothing to write there. Pointing it at
-# the install dir keeps it from wandering into /root or failing outright.
-Environment=HOME=__INSTALL_DIR__
-
-ExecStart=__INSTALL_DIR__/bin/bun ./server.js
+ExecStart=__INSTALL_DIR__/memo
 Restart=on-failure
 RestartSec=5
 
@@ -26,7 +22,7 @@ ReadWritePaths=__DATA_DIR__
 
 # Sandboxing. Note what is *not* here: ProtectHome would hide the data dir
 # under /home/yunohost.app, and MemoryDenyWriteExecute would stop the
-# JavaScript engine from compiling anything.
+# JavaScript engine inside the binary from compiling anything.
 NoNewPrivileges=yes
 PrivateTmp=yes
 PrivateDevices=yes

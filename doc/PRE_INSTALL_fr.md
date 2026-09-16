@@ -1,5 +1,6 @@
-Ce paquet ne tourne que sur x86-64 et aarch64. Bun, le runtime dont memo a
-besoin, ne publie pas de binaire pour armhf ni pour les machines 32 bits.
+Ce paquet ne tourne que sur x86-64 et aarch64. memo est compilé avec bun, qui
+ne publie pas de runtime pour armhf ni pour les machines 32 bits.
 
-L'installation télécharge une quarantaine de Mo de bun et quelques paquets npm :
-le serveur doit pouvoir joindre github.com et registry.npmjs.org.
+L'installation télécharge un binaire d'environ 90 Mo depuis codeberg.org, et
+rien d'autre. Sur x86-64 c'est celui que votre processeur sait exécuter : le
+rapide s'il a AVX2, le « baseline » sinon.

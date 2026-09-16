@@ -7,32 +7,34 @@
 # What `yunohost service` shows next to memo in the webadmin.
 service_description="Collaborative sticky-note boards"
 
-# The bun runtime, unpacked into $install_dir/bin/bun.
+# Downloads the memo binary and picks the build this processor can run.
 #
-# YunoHost has an ynh_nodejs_install but nothing for bun, so the release zip is
-# just another source. It carries one top-level directory, which ynh_setup_source
-# strips by default, leaving the binary alone in bin/.
-memo_setup_bun() {
-    mkdir --parents "$install_dir/bin"
-    ynh_setup_source --dest_dir="$install_dir/bin" --source_id="bun"
-    chmod 755 "$install_dir/bin/bun"
-    chown "$app:$app" "$install_dir/bin/bun"
+# Upstream publishes three: arm64, amd64, and an amd64 one compiled without
+# AVX2. The plain amd64 build dies with SIGILL on a processor older than
+# Haswell, so it is only installed when /proc/cpuinfo claims the flag, and the
+# binary is run once before the service does to catch a machine that claims it
+# and means it differently. Whatever fails that test falls back to baseline.
+memo_setup_binary() {
+    local source_id="main"
+
+    if [[ "$YNH_ARCH" == "amd64" ]] && grep --quiet --word-regexp avx2 /proc/cpuinfo; then
+        source_id="amd64_avx2"
+    fi
+
+    memo_install_binary "$source_id"
+
+    if [[ "$source_id" != "main" ]] && ! ynh_exec_as_app "$install_dir/memo" --help > /dev/null 2>&1; then
+        ynh_print_warn "The AVX2 build will not run on this processor, falling back to the baseline one"
+        memo_install_binary "main"
+    fi
 }
 
-# node_modules, fetched by the bun we just unpacked.
-#
-# There are four packages and no compilation step, so this is quick and needs
-# no toolchain. The app user has no home directory; both bun's home and its
-# download cache are pointed inside the install dir and the cache is thrown
-# away once the packages are unpacked.
-memo_bun_install() {
-    ynh_exec_as_app \
-        HOME="$install_dir" \
-        BUN_INSTALL_CACHE_DIR="$install_dir/.bun-cache" \
-        "$install_dir/bin/bun" install --cwd "$install_dir" --production --frozen-lockfile
+# Unpacks one of the binary sources over the install dir, executable and owned.
+memo_install_binary() {
+    ynh_setup_source --dest_dir="$install_dir" --source_id="$1" --full_replace
 
-    ynh_safe_rm "$install_dir/.bun-cache"
-    ynh_safe_rm "$install_dir/.bun"
+    chmod 750 "$install_dir/memo"
+    chown "$app:$app" "$install_dir/memo"
 }
 
 # The whole configuration, in one file, read by systemd before it drops

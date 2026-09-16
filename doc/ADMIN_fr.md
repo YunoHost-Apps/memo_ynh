@@ -2,7 +2,7 @@
 
 | Quoi | Où |
 | --- | --- |
-| Le code, le runtime bun, node_modules | `/var/www/memo` |
+| Le binaire memo, avec toutes les pages et polices dedans | `/var/www/memo/memo` |
 | Tous les tableaux, dans un fichier SQLite | `/home/yunohost.app/memo/memo.sqlite` |
 | Les instantanés pris depuis la page d'administration | `/home/yunohost.app/memo/backups` |
 | Configuration | `/var/www/memo/.env` |
@@ -88,12 +88,12 @@ lui-même pour se faire passer pour qui il veut.
 
 ## Sauvegardes
 
-L'archive YunoHost emporte tout le répertoire d'installation, dont une centaine
-de Mo de runtime bun et de node_modules. Une restauration n'a alors besoin
-d'aucun réseau. Si vous sauvegardez toutes les nuits et que la taille gêne,
-sauvegardez le répertoire de données seul : les tableaux, c'est tout ce qu'il
-contient, et une réinstallation suivie d'une restauration de `$data_dir` vous
-ramène au même point.
+L'archive YunoHost emporte tout le répertoire d'installation, dont la quasi
+totalité est le binaire de 90 Mo. Une restauration n'a alors besoin d'aucun
+réseau. Si vous sauvegardez toutes les nuits et que la taille gêne, sauvegardez
+le répertoire de données seul : les tableaux, c'est tout ce qu'il contient, et
+une réinstallation suivie d'une restauration de `$data_dir` vous ramène au même
+point.
 
 memo prend aussi ses propres instantanés, depuis la page d'administration. Le
 `VACUUM INTO` copie la base pendant que le serveur continue de servir, la copie
@@ -105,7 +105,23 @@ pouvoir en prendre un au milieu d'un atelier sans passer par un shell.
 
 ## Architecture
 
-Bun ne publie de binaires que pour x86-64 et aarch64. Une carte armhf ou une
-machine 32 bits ne peut pas faire tourner ce paquet. Le binaire x86-64 livré
-ici est le « baseline », qui fonctionne sur des processeurs antérieurs à 2013,
-un peu moins vite.
+memo est un seul binaire compilé, environ 90 Mo, qui contient le runtime bun,
+le serveur et chaque page, police et image de fond qu'il sert. Rien d'autre
+n'est installé : pas de dépôt cloné, pas de node_modules, aucun registre npm à
+joindre.
+
+Il est compilé avec bun, qui ne fournit pas de runtime pour armhf ni pour les
+machines 32 bits, donc ce paquet ne s'installe que sur x86-64 et aarch64.
+
+Chaque version publie trois binaires et l'installation en choisit un. Sur
+aarch64 il n'y a que le binaire arm64. Sur x86-64 elle lit les drapeaux du
+processeur dans `/proc/cpuinfo` : AVX2, c'est-à-dire tout ce qui date d'après
+2013 environ, reçoit le binaire rapide, et une machine plus ancienne reçoit le
+« baseline », qui fait la même chose un peu moins vite. Le binaire choisi est
+ensuite lancé une fois avec `--help` avant que le service démarre, pour qu'une
+machine qui annonce AVX2 sans vraiment le faire retombe sur le baseline plutôt
+que de vous laisser un service qui meurt sur `Illegal instruction`.
+
+Chaque mise à jour refait ce choix. Une restauration non : l'archive emporte le
+binaire retenu sur l'ancienne machine, donc après une restauration sur un autre
+processeur, lancez `yunohost app upgrade -F memo` pour obtenir le bon.
