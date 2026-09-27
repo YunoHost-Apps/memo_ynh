@@ -8,7 +8,7 @@ description.en = "Collaborative sticky-note boards in real time, stored in one S
 description.fr = "Tableaux de post-it collaboratifs en temps réel, stockés dans un seul fichier SQLite"
 
 # <upstream tag>~ynh<packaging revision>
-version = "0.9.10~ynh1"
+version = "0.9.13~ynh1"
 
 maintainers = ["mrflos"]
 
@@ -82,10 +82,10 @@ ram.runtime = "200M"
     # What runs anywhere: the baseline build on amd64, which asks nothing of
     # the processor beyond plain x86-64, and the only build there is on arm64.
     [resources.sources.main]
-    amd64.url = "https://codeberg.org/mrflos/memo/releases/download/v0.9.10/memo-0.9.10-linux-amd64-baseline"
-    amd64.sha256 = "481a56ab2deacc1c3d0e4b9754fb1593919a392d8d4f157b94e40b90b31da2f6"
-    arm64.url = "https://codeberg.org/mrflos/memo/releases/download/v0.9.10/memo-0.9.10-linux-arm64"
-    arm64.sha256 = "9b79a202f3d210bf87765d6cc6bb4f0292df4e373202d57e7dd64a6f4220eb83"
+    amd64.url = "https://codeberg.org/mrflos/memo/releases/download/v0.9.13/memo-0.9.13-linux-amd64-baseline"
+    amd64.sha256 = "6d68c977660c75f8839ac78aff5a660a2fe776b64128828acc5495d90086f36b"
+    arm64.url = "https://codeberg.org/mrflos/memo/releases/download/v0.9.13/memo-0.9.13-linux-arm64"
+    arm64.sha256 = "6a4713a3694a02ebb8b162e6b2f23f092c809e8b011fd3c8fd8f0e9d5bac4d86"
     extract = false
     rename = "memo"
     prefetch = false
@@ -99,8 +99,8 @@ ram.runtime = "200M"
     # Installed in place of the baseline one when the processor has the flag,
     # so no arm64 asset belongs here.
     [resources.sources.amd64_avx2]
-    amd64.url = "https://codeberg.org/mrflos/memo/releases/download/v0.9.10/memo-0.9.10-linux-amd64"
-    amd64.sha256 = "440ca4fd9d9957a32b9f53f7a02667ad42567c631a3697dad66de997140a6ad9"
+    amd64.url = "https://codeberg.org/mrflos/memo/releases/download/v0.9.13/memo-0.9.13-linux-amd64"
+    amd64.sha256 = "0c8b535c52a2c535aaa681ac23c80745b5317f7a297fe9551087b9441f1c0d5b"
     extract = false
     rename = "memo"
     prefetch = false
